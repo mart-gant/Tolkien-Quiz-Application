@@ -1,21 +1,29 @@
 # Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+-keep class com.marcingantkowski.tolkienquizapp.domain.model.** { *; }
+-keep class com.marcingantkowski.tolkienquizapp.data.remote.dto.** { *; }
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Keep Composables
+-keepclassmembers class * {
+    @androidx.compose.runtime.Composable <methods>;
+}
+-keep class * implements androidx.compose.ui.tooling.preview.PreviewParameterProvider
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Keep Hilt generated classes
+-keep class * extends dagger.hilt.internal.aggregatedroot.AggregatedRoot
+-keep class * extends dagger.hilt.internal.processedrootsentinel.ProcessedRootSentinel
+-keep class * extends dagger.hilt.android.internal.managers.ActivityComponentManager.FragmentComponentBuilder
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Keep Retrofit/Gson
+-keep class retrofit2.Call
+-keepclasseswithmembers,allowshrinking class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}
+
+# Keep Room entities and converters
+-keep class androidx.room.TypeConverter { *; }
+-keepclassmembers class * extends androidx.room.RoomDatabase {
+    public static final java.lang.String NAME;
+}
+-keepclassmembers class **.R$* {
+    public static final int[] <fields>;
+}
