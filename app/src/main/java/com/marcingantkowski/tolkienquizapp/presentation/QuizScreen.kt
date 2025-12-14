@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.marcingantkowski.tolkienquizapp.domain.model.Question
+import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -32,6 +33,8 @@ fun QuizScreen(quizViewModel: QuizViewModel = hiltViewModel()) {
             QuizFinishedState(
                 score = state.score,
                 totalQuestions = state.questions.size,
+                totalTime = state.totalTimeTakenInMillis,
+                avgTimePerQuestion = state.averageAnswerTimeInMillis,
                 onRestart = { quizViewModel.onRestartClicked() }
             )
         } else if (state.questions.isNotEmpty()) {
@@ -41,6 +44,12 @@ fun QuizScreen(quizViewModel: QuizViewModel = hiltViewModel()) {
                 LinearProgressIndicator(
                     progress = progress,
                     modifier = Modifier.fillMaxWidth()
+                )
+                // Time progress
+                LinearProgressIndicator(
+                    progress = state.timeProgress,
+                    modifier = Modifier.fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.secondary
                 )
                 Text(
                     text = "Pytanie ${state.currentQuestionIndex + 1} z ${state.questions.size}",
@@ -144,16 +153,39 @@ private fun ErrorState(errorMessage: String, onRetry: () -> Unit) {
 }
 
 @Composable
-private fun QuizFinishedState(score: Int, totalQuestions: Int, onRestart: () -> Unit) {
+private fun QuizFinishedState(
+    score: Int,
+    totalQuestions: Int,
+    totalTime: Long,
+    avgTimePerQuestion: Long,
+    onRestart: () -> Unit
+) {
+    // Formatters for time
+    val totalTimeFormatted = String.format(
+        "%02d:%02d",
+        TimeUnit.MILLISECONDS.toMinutes(totalTime),
+        TimeUnit.MILLISECONDS.toSeconds(totalTime) -
+                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(totalTime))
+    )
+    val avgTimeFormatted = String.format("%.2f s", avgTimePerQuestion / 1000.0)
+
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Koniec quizu!")
+        Text(text = "Koniec quizu!", style = MaterialTheme.typography.headlineMedium)
         Spacer(modifier = Modifier.height(16.dp))
-        Text(text = "Twój wynik: $score/$totalQuestions")
-        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(text = "Twój wynik: $score/$totalQuestions", style = MaterialTheme.typography.titleLarge)
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Statistics
+        Text(text = "Całkowity czas: $totalTimeFormatted")
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(text = "Średni czas na pytanie: $avgTimeFormatted")
+        Spacer(modifier = Modifier.height(32.dp))
+
         Button(onClick = onRestart) {
             Text(text = "Zacznij od nowa")
         }
