@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "11614361482",
+    "project_id": "tolkien-quiz-application",
+    "storage_bucket": "tolkien-quiz-application.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:11614361482:android:3419d5f7344ea14ddfda73",
+        "android_client_info": {
+          "package_name": "com.marcingantkowski.tolkienquizapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKXmq2SzLb9SyHpQp3tMhrU1TauIUUy5A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

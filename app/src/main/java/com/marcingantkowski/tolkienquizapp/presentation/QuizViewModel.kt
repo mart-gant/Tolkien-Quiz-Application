@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.marcingantkowski.tolkienquizapp.domain.engine.QuizEngine
 import com.marcingantkowski.tolkienquizapp.domain.model.HighScore
+import com.marcingantkowski.tolkienquizapp.domain.model.QuizProgress
 import com.marcingantkowski.tolkienquizapp.domain.use_case.GetQuestionsUseCase
 import com.marcingantkowski.tolkienquizapp.domain.use_case.SaveHighScoreUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,6 +18,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 private const val QUESTION_TIME_LIMIT_MILLIS = 15000L
+private const val STATE_KEY_QUIZ_PROGRESS = "quizProgress"
 
 @HiltViewModel
 class QuizViewModel @Inject constructor(
@@ -32,13 +34,13 @@ class QuizViewModel @Inject constructor(
     val state: State<QuizState> = _state
 
     init {
-        loadQuestions()
+        restoreOrLoadNewQuiz()
     }
 
     fun onAnswerSelected(selectedAnswerIndex: Int) {
         timerJob?.cancel()
         quizEngine?.selectAnswer(selectedAnswerIndex)
-        updateState()
+        updateStateAndSave()
     }
 
     fun onNextQuestionClicked() {
@@ -46,17 +48,30 @@ class QuizViewModel @Inject constructor(
             if (status == QuizEngine.MoveToNextStatus.QUIZ_FINISHED) {
                 finishQuiz()
             } else {
-                updateState()
+                updateStateAndSave()
                 startTimer()
             }
         }
     }
 
     fun onRestartClicked() {
-        loadQuestions()
+        timerJob?.cancel()
+        savedStateHandle.remove<QuizProgress>(STATE_KEY_QUIZ_PROGRESS)
+        loadNewQuestions()
     }
 
-    private fun loadQuestions() {
+    private fun restoreOrLoadNewQuiz() {
+        val savedProgress: QuizProgress? = savedStateHandle[STATE_KEY_QUIZ_PROGRESS]
+        if (savedProgress != null) {
+            quizEngine = QuizEngine(savedProgress)
+            updateState()
+            startTimer()
+        } else {
+            loadNewQuestions()
+        }
+    }
+
+    private fun loadNewQuestions() {
         viewModelScope.launch {
             _state.value = QuizState(isLoading = true)
             try {
@@ -70,7 +85,7 @@ class QuizViewModel @Inject constructor(
                     type = if (type == "any") null else type
                 )
                 quizEngine = QuizEngine(questions)
-                updateState()
+                updateStateAndSave()
                 startTimer()
             } catch (e: Exception) {
                 _state.value = QuizState(error = e.localizedMessage ?: "An unexpected error occurred")
@@ -98,10 +113,15 @@ class QuizViewModel @Inject constructor(
             if (status == QuizEngine.MoveToNextStatus.QUIZ_FINISHED) {
                 finishQuiz()
             } else {
-                updateState()
+                updateStateAndSave()
                 startTimer()
             }
         }
+    }
+
+    private fun updateStateAndSave() {
+        updateState()
+        saveState()
     }
 
     private fun updateState() {
@@ -116,7 +136,15 @@ class QuizViewModel @Inject constructor(
         )
     }
 
+    private fun saveState() {
+        quizEngine?.getQuizProgress()?.let {
+            savedStateHandle[STATE_KEY_QUIZ_PROGRESS] = it
+        }
+    }
+
     private fun finishQuiz() {
+        timerJob?.cancel()
+        savedStateHandle.remove<QuizProgress>(STATE_KEY_QUIZ_PROGRESS)
         viewModelScope.launch {
             val engine = quizEngine ?: return@launch
             saveHighScoreUseCase(
@@ -126,7 +154,6 @@ class QuizViewModel @Inject constructor(
                     timestamp = System.currentTimeMillis()
                 )
             )
-            // Final state update with statistics
             _state.value = _state.value.copy(
                 isQuizFinished = true,
                 totalTimeTakenInMillis = engine.totalTimeTakenInMillis,

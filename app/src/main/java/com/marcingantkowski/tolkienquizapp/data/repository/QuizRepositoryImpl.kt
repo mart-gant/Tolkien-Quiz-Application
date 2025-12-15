@@ -1,8 +1,8 @@
 package com.marcingantkowski.tolkienquizapp.data.repository
 
 import android.text.Html
-import com.marcingantkowski.tolkienquizapp.data.local.HighScoreDao
-import com.marcingantkowski.tolkienquizapp.data.local.HighScoreEntity
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.marcingantkowski.tolkienquizapp.data.local.QuestionDao
 import com.marcingantkowski.tolkienquizapp.data.local.QuestionEntity
 import com.marcingantkowski.tolkienquizapp.data.remote.TriviaApi
@@ -13,12 +13,15 @@ import com.marcingantkowski.tolkienquizapp.domain.model.Category
 import com.marcingantkowski.tolkienquizapp.domain.model.HighScore
 import com.marcingantkowski.tolkienquizapp.domain.model.Question
 import com.marcingantkowski.tolkienquizapp.domain.repository.QuizRepository
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
+
+private const val HIGH_SCORES_COLLECTION = "highscores"
 
 class QuizRepositoryImpl @Inject constructor(
     private val api: TriviaApi,
     private val questionDao: QuestionDao,
-    private val highScoreDao: HighScoreDao
+    private val firestore: FirebaseFirestore
 ) : QuizRepository {
     override suspend fun getQuestions(category: Int?, difficulty: String?, type: String?): List<Question> {
         return try {
@@ -41,11 +44,18 @@ class QuizRepositoryImpl @Inject constructor(
     }
 
     override suspend fun saveHighScore(highScore: HighScore) {
-        highScoreDao.insertHighScore(highScore.toHighScoreEntity())
+        firestore.collection(HIGH_SCORES_COLLECTION)
+            .add(highScore)
+            .await()
     }
 
     override suspend fun getHighScores(): List<HighScore> {
-        return highScoreDao.getHighScores().map { it.toHighScore() }
+        return firestore.collection(HIGH_SCORES_COLLECTION)
+            .orderBy("score", Query.Direction.DESCENDING)
+            .limit(100)
+            .get()
+            .await()
+            .toObjects(HighScore::class.java)
     }
 
     override suspend fun getCategories(): List<Category> {
@@ -73,22 +83,6 @@ private fun QuestionEntity.toQuestion(): Question {
     return Question(
         text = text,
         answers = domainAnswers
-    )
-}
-
-private fun HighScore.toHighScoreEntity(): HighScoreEntity {
-    return HighScoreEntity(
-        score = score,
-        totalQuestions = totalQuestions,
-        timestamp = timestamp
-    )
-}
-
-private fun HighScoreEntity.toHighScore(): HighScore {
-    return HighScore(
-        score = score,
-        totalQuestions = totalQuestions,
-        timestamp = timestamp
     )
 }
 

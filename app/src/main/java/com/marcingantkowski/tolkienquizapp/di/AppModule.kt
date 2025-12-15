@@ -11,6 +11,9 @@ import com.marcingantkowski.tolkienquizapp.domain.use_case.GetCategoriesUseCase
 import com.marcingantkowski.tolkienquizapp.domain.use_case.GetHighScoresUseCase
 import com.marcingantkowski.tolkienquizapp.domain.use_case.GetQuestionsUseCase
 import com.marcingantkowski.tolkienquizapp.domain.use_case.SaveHighScoreUseCase
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -51,8 +54,18 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideQuizRepository(api: TriviaApi, db: QuizDatabase): QuizRepository {
-        return QuizRepositoryImpl(api, db.questionDao, db.highScoreDao)
+    fun provideFirestoreDatabase(): FirebaseFirestore { // <-- DODANA FUNKCJA
+        return Firebase.firestore
+    }
+
+    @Provides
+    @Singleton
+    fun provideQuizRepository(
+        api: TriviaApi, 
+        db: QuizDatabase,
+        firestore: FirebaseFirestore // <-- DODANA ZALEŻNOŚĆ
+    ): QuizRepository {
+        return QuizRepositoryImpl(api, db.questionDao, firestore) // <-- ZMIENIONA IMPLEMENTACJA
     }
 
     @Provides
