@@ -1,6 +1,7 @@
 package com.marcingantkowski.tolkienquizapp.domain.engine
 
 import com.marcingantkowski.tolkienquizapp.domain.model.Question
+import com.marcingantkowski.tolkienquizapp.domain.model.QuizProgress
 
 /**
  * Manages the core logic of a quiz session.
@@ -28,6 +29,27 @@ class QuizEngine(val questions: List<Question>) {
 
     private var currentQuestionStartTime: Long = 0
 
+    /**
+     * Secondary constructor to restore the engine's state from a progress object.
+     */
+    constructor(progress: QuizProgress) : this(progress.questions) {
+        this.currentQuestionIndex = progress.currentQuestionIndex
+        this.score = progress.score
+        this.totalTimeTakenInMillis = progress.totalTimeTakenInMillis
+    }
+
+    /**
+     * Creates a snapshot of the current quiz progress.
+     */
+    fun getQuizProgress(): QuizProgress {
+        return QuizProgress(
+            questions = this.questions,
+            currentQuestionIndex = this.currentQuestionIndex,
+            score = this.score,
+            totalTimeTakenInMillis = this.totalTimeTakenInMillis
+        )
+    }
+
     val isQuizFinished: Boolean
         get() = currentQuestionIndex >= questions.size
 
@@ -54,7 +76,7 @@ class QuizEngine(val questions: List<Question>) {
 
         recordTime()
         selectedAnswerIndex = answerIndex
-        if (currentQuestion?.correctAnswerIndex == answerIndex) {
+        if (currentQuestion?.answers?.getOrNull(answerIndex)?.isCorrect == true) {
             score++
         }
         return true

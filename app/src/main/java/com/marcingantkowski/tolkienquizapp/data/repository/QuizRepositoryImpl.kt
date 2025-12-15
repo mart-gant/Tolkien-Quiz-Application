@@ -8,6 +8,7 @@ import com.marcingantkowski.tolkienquizapp.data.local.QuestionEntity
 import com.marcingantkowski.tolkienquizapp.data.remote.TriviaApi
 import com.marcingantkowski.tolkienquizapp.data.remote.dto.CategoryDto
 import com.marcingantkowski.tolkienquizapp.data.remote.dto.QuestionDto
+import com.marcingantkowski.tolkienquizapp.domain.model.Answer
 import com.marcingantkowski.tolkienquizapp.domain.model.Category
 import com.marcingantkowski.tolkienquizapp.domain.model.HighScore
 import com.marcingantkowski.tolkienquizapp.domain.model.Question
@@ -63,10 +64,15 @@ private fun QuestionDto.toQuestionEntity(): QuestionEntity {
 }
 
 private fun QuestionEntity.toQuestion(): Question {
+    val domainAnswers = answers.mapIndexed { index, answerText ->
+        Answer(
+            text = answerText,
+            isCorrect = (index == correctAnswerIndex)
+        )
+    }
     return Question(
         text = text,
-        answers = answers,
-        correctAnswerIndex = correctAnswerIndex
+        answers = domainAnswers
     )
 }
 

@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">TolkienQuizApp</string>
+
+    <!-- Quiz Screen -->
+    <string name="question_progress">Pytanie %1$d z %2$d</string>
+    <string name="quiz_finished_title">Koniec quizu!</string>
+    <string name="your_score">Twój wynik: %1$d/%2$d</string>
+    <string name="total_time">Całkowity czas: %1$s</string>
+    <string name="average_time_per_question">Średni czas na pytanie: %1$s</string>
+    <string name="next_button">Dalej</string>
+    <string name="restart_button">Zacznij od nowa</string>
+    <string name="retry_button">Spróbuj ponownie</string>
+
+    <!-- High Scores Screen -->
+    <string name="high_scores_title">Najlepsze wyniki</string>
+    <string name="no_scores_available">Brak wyników</string>
 </resources>

@@ -7,9 +7,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.marcingantkowski.tolkienquizapp.R
 import com.marcingantkowski.tolkienquizapp.domain.model.HighScore
 import java.text.SimpleDateFormat
 import java.util.*
@@ -24,7 +26,7 @@ fun HighScoresScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Najlepsze wyniki") }
+                title = { Text(stringResource(id = R.string.high_scores_title)) }
             )
         }
     ) { padding ->
@@ -48,7 +50,7 @@ fun HighScoresScreen(
                 }
                 state.highScores.isEmpty() -> {
                     Text(
-                        text = "Brak wyników",
+                        text = stringResource(id = R.string.no_scores_available),
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }

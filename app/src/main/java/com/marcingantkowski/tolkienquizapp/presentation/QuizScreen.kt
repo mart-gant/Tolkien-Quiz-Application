@@ -11,8 +11,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.marcingantkowski.tolkienquizapp.R
 import com.marcingantkowski.tolkienquizapp.domain.model.Question
 import java.util.concurrent.TimeUnit
 
@@ -52,7 +54,11 @@ fun QuizScreen(quizViewModel: QuizViewModel = hiltViewModel()) {
                     color = MaterialTheme.colorScheme.secondary
                 )
                 Text(
-                    text = "Pytanie ${state.currentQuestionIndex + 1} z ${state.questions.size}",
+                    text = stringResource(
+                        R.string.question_progress,
+                        state.currentQuestionIndex + 1,
+                        state.questions.size
+                    ),
                     modifier = Modifier
                         .padding(16.dp)
                         .align(Alignment.CenterHorizontally)
@@ -97,7 +103,7 @@ private fun QuestionContent(
         Spacer(modifier = Modifier.height(32.dp))
         question.answers.forEachIndexed { index, answer ->
             val isSelected = selectedAnswerIndex == index
-            val isCorrect = question.correctAnswerIndex == index
+            val isCorrect = answer.isCorrect
 
             val buttonColors = when {
                 selectedAnswerIndex == null -> ButtonDefaults.buttonColors()
@@ -105,7 +111,7 @@ private fun QuestionContent(
                 isSelected && !isCorrect -> ButtonDefaults.buttonColors(containerColor = Color.Red)
                 else -> ButtonDefaults.buttonColors()
             }
-            
+
             val icon = when {
                 selectedAnswerIndex == null -> null
                 isCorrect -> Icons.Default.Check
@@ -120,10 +126,14 @@ private fun QuestionContent(
                 enabled = selectedAnswerIndex == null
             ) {
                 if (icon != null) {
-                    Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(ButtonDefaults.IconSize)
+                    )
                     Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
                 }
-                Text(text = answer)
+                Text(text = answer.text)
             }
             Spacer(modifier = Modifier.height(8.dp))
         }
@@ -131,7 +141,7 @@ private fun QuestionContent(
         if (selectedAnswerIndex != null) {
             Spacer(modifier = Modifier.height(16.dp))
             Button(onClick = onNextClicked) {
-                Text(text = "Dalej")
+                Text(text = stringResource(R.string.next_button))
             }
         }
     }
@@ -147,7 +157,7 @@ private fun ErrorState(errorMessage: String, onRetry: () -> Unit) {
         Text(text = errorMessage)
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = onRetry) {
-            Text(text = "Spróbuj ponownie")
+            Text(text = stringResource(R.string.retry_button))
         }
     }
 }
@@ -174,20 +184,26 @@ private fun QuizFinishedState(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Koniec quizu!", style = MaterialTheme.typography.headlineMedium)
+        Text(
+            text = stringResource(R.string.quiz_finished_title),
+            style = MaterialTheme.typography.headlineMedium
+        )
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(text = "Twój wynik: $score/$totalQuestions", style = MaterialTheme.typography.titleLarge)
+        Text(
+            text = stringResource(R.string.your_score, score, totalQuestions),
+            style = MaterialTheme.typography.titleLarge
+        )
         Spacer(modifier = Modifier.height(32.dp))
 
         // Statistics
-        Text(text = "Całkowity czas: $totalTimeFormatted")
+        Text(text = stringResource(R.string.total_time, totalTimeFormatted))
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "Średni czas na pytanie: $avgTimeFormatted")
+        Text(text = stringResource(R.string.average_time_per_question, avgTimeFormatted))
         Spacer(modifier = Modifier.height(32.dp))
 
         Button(onClick = onRestart) {
-            Text(text = "Zacznij od nowa")
+            Text(text = stringResource(R.string.restart_button))
         }
     }
 }
