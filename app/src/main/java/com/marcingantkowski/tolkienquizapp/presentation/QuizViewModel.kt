@@ -5,6 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.marcingantkowski.tolkienquizapp.domain.engine.QuizEngine
 import com.marcingantkowski.tolkienquizapp.domain.model.HighScore
 import com.marcingantkowski.tolkienquizapp.domain.model.QuizProgress
@@ -147,13 +149,19 @@ class QuizViewModel @Inject constructor(
         savedStateHandle.remove<QuizProgress>(STATE_KEY_QUIZ_PROGRESS)
         viewModelScope.launch {
             val engine = quizEngine ?: return@launch
+
+            // Pobierz UID aktualnego użytkownika
+            val userId = Firebase.auth.currentUser?.uid ?: "anonymous"
+
             saveHighScoreUseCase(
                 HighScore(
                     score = engine.score,
                     totalQuestions = engine.questions.size,
-                    timestamp = System.currentTimeMillis()
+                    timestamp = System.currentTimeMillis(),
+                    userId = userId // <-- DODANE POLE
                 )
             )
+
             _state.value = _state.value.copy(
                 isQuizFinished = true,
                 totalTimeTakenInMillis = engine.totalTimeTakenInMillis,

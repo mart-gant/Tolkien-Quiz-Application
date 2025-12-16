@@ -2,7 +2,6 @@ package com.marcingantkowski.tolkienquizapp.di
 
 import android.app.Application
 import androidx.room.Room
-import com.marcingantkowski.tolkienquizapp.data.local.HighScoreDao
 import com.marcingantkowski.tolkienquizapp.data.local.QuizDatabase
 import com.marcingantkowski.tolkienquizapp.data.remote.TriviaApi
 import com.marcingantkowski.tolkienquizapp.data.repository.QuizRepositoryImpl
@@ -48,24 +47,18 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideHighScoreDao(db: QuizDatabase): HighScoreDao {
-        return db.highScoreDao
-    }
-
-    @Provides
-    @Singleton
-    fun provideFirestoreDatabase(): FirebaseFirestore { // <-- DODANA FUNKCJA
+    fun provideFirestoreDatabase(): FirebaseFirestore {
         return Firebase.firestore
     }
 
     @Provides
     @Singleton
     fun provideQuizRepository(
-        api: TriviaApi, 
+        api: TriviaApi,
         db: QuizDatabase,
-        firestore: FirebaseFirestore // <-- DODANA ZALEŻNOŚĆ
+        firestore: FirebaseFirestore
     ): QuizRepository {
-        return QuizRepositoryImpl(api, db.questionDao, firestore) // <-- ZMIENIONA IMPLEMENTACJA
+        return QuizRepositoryImpl(api, db.questionDao, firestore)
     }
 
     @Provides

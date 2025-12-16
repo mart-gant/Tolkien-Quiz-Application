@@ -6,5 +6,6 @@ import androidx.annotation.Keep
 data class HighScore(
     val score: Int = 0,
     val totalQuestions: Int = 0,
-    val timestamp: Long = 0
+    val timestamp: Long = 0,
+    val userId: String = "" // <-- DODANE POLE
 )

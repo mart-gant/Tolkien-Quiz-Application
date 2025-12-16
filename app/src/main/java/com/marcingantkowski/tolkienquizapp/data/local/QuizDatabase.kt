@@ -5,11 +5,12 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
 @Database(
-    entities = [QuestionEntity::class, HighScoreEntity::class],
-    version = 2
+    entities = [QuestionEntity::class], // Usunięto HighScoreEntity
+    version = 1, // Zmieniono wersję na 1
+    exportSchema = false // Dodano, aby uniknąć ostrzeżeń o schemacie
 )
 @TypeConverters(Converters::class)
 abstract class QuizDatabase : RoomDatabase() {
     abstract val questionDao: QuestionDao
-    abstract val highScoreDao: HighScoreDao
+    // Usunięto highScoreDao
 }
